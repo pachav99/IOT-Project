@@ -60,7 +60,7 @@ This project helped us:
 - Arduino (UNO R4)
 - MQTT (PubSubClient)
 - Podman (for running Telegraf)
-- Telegraf
+- Telegraf (Location : SAD\sad\telegraf.conf)
 - InfluxDB v2
 - Grafana
 - PowerShell (.ps1) for environment setup
