@@ -1,0 +1,20 @@
+query 1: (Temperature)
+
+from(bucket: "iot_data")
+  |> range(start: -1000h)
+  |> filter(fn: (r) => r._measurement == "iot_sensor" and r._field == "temperature")
+  |> last()
+
+  query 2: (Humidity)
+
+  from(bucket: "iot_data")
+  |> range(start: -5m)
+  |> filter(fn: (r) => r._measurement == "iot_sensor" and r._field == "humidity")
+  |> last()
+
+  query 3: (soil moisture)
+
+  from(bucket: "iot_data")
+  |> range(start: -5m)
+  |> filter(fn: (r) => r._measurement == "iot_sensor" and r._field == "moisture_percent")
+  |> last()

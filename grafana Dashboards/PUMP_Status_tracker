@@ -1,0 +1,35 @@
+PUMP CHECK:
+
+import "strings"
+
+from(bucket: "iot_data")
+  |> range(start: -6h)
+  |> filter(fn: (r) =>
+    r._measurement == "iot_sensor" and
+    (r._field == "moisture_percent" or r._field == "pump_status")
+  )
+  |> aggregateWindow(every: 10s, fn: last, createEmpty: false)
+  |> pivot(rowKey: ["_time"], columnKey: ["_field"], valueColumn: "_value")
+  |> map(fn: (r) => ({
+    _time: r._time,
+    moisture: r.moisture_percent,
+    pump: strings.toLower(v: r.pump_status),
+    _value: if r.moisture_percent < 50.0 and strings.toLower(v: r.pump_status) == "on" then 1
+      else if r.moisture_percent < 50.0 and strings.toLower(v: r.pump_status) == "off" then -1
+      else 0,
+    result: if r.moisture_percent < 50.0 and strings.toLower(v: r.pump_status) == "on" then "✅ OK"
+      else if r.moisture_percent < 50.0 and strings.toLower(v: r.pump_status) == "off" then "❌ Error"
+      else "⚪️ Normal"
+  }))
+
+
+ Pump Status:
+
+ from(bucket: "iot_data")
+  |> range(start: -5m)
+  |> filter(fn: (r) => r._measurement == "iot_sensor" and r._field == "pump_status")
+  |> last()
+  |> map(fn: (r) => ({
+    r with _value: if r._value == "on" then 1 else 0
+  }))
+

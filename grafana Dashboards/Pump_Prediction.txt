@@ -1,0 +1,54 @@
+Days Until Pump Failure:
+
+lifespan = 100000.0  // total minutes
+
+from(bucket: "iot_data")
+  |> range(start: -90d)
+  |> filter(fn: (r) =>
+    r._measurement == "iot_sensor" and
+    r._field == "pump_status" and
+    r._value == "on"
+  )
+  |> count()
+  |> map(fn: (r) => {
+    used = float(v: r._value)
+    avg_per_day = used / 90.0
+    days_remaining = (lifespan - used) / avg_per_day
+
+    return {
+      _time: r._time,
+      _value: days_remaining
+    }
+  })
+
+
+Runtime in minutes:
+
+from(bucket: "iot_data")
+  |> range(start: -90d)
+  |> filter(fn: (r) =>
+    r._measurement == "iot_sensor" and
+    r._field == "pump_status" and
+    r._value == "on"
+  )
+  |> count()
+  |> map(fn: (r) => ({
+    _time: r._time,
+    _value: float(v: r._value)  // 1 minute per ON
+  }))
+
+Pump ON Count per Day:
+
+from(bucket: "iot_data")
+  |> range(start: -90d)
+  |> filter(fn: (r) =>
+    r._measurement == "iot_sensor" and
+    r._field == "pump_status" and
+    r._value == "on"
+  )
+  |> count()
+  |> map(fn: (r) => ({
+    _time: r._time,
+    _value: float(v: r._value)  // 1 minute per ON
+  }))
+
